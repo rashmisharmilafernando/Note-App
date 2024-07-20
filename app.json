@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ndp-note",
-    "slug": "ndp-note",
+    "name": "MemoMinder",
+    "slug": "MemoMinder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,10 +18,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.rashi0430.MemoMinder"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9f8e97aa-11af-4aed-8142-127f1d530c1e"
+      }
     }
   }
 }

@@ -103,7 +103,7 @@ const NoteDetails = (props) => {
                     onPress={openEditModal}
                 />
             </View>
-            <NoteInputModel isEdit={isEdit} note={note} onClose={handleOnClose} onsubmit={handleUpdate} visible={showModal} />
+            <NoteInputModel isEdit={isEdit} note={note} onClose={handleOnClose} onSubmit={handleUpdate} visible={showModal} />
         </>
     );
 }
