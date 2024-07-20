@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, Dimensions, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, Dimensions, ScrollView, Alert, Image } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
 import colors from "../misc/colors";
 import RoundIconBtn from "./RoundIconButton";
@@ -27,7 +27,6 @@ const NoteDetails = (props) => {
     const [showModal, setModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
 
-
     const deleteNote = async () => {
         const result = await AsyncStorage.getItem('notes');
         let notes = [];
@@ -39,7 +38,7 @@ const NoteDetails = (props) => {
         props.navigation.goBack();
     }
 
-    const dispalyDelectAlert = () => {
+    const displayDeleteAlert = () => {
         Alert.alert(
             'Are you sure!',
             "This action will delete your note permanently!",
@@ -59,43 +58,61 @@ const NoteDetails = (props) => {
         );
     }
 
-    const handleUpdate = async (title, desc, time) => {
+    const handleUpdate = async (title, desc, time, images) => {
         const result = await AsyncStorage.getItem('notes')
         let notes = [];
         if (result != null) notes = JSON.parse(result)
-        const newNotes = notes.filter(n => {
+        const newNotes = notes.map(n => {
             if (n.id === note.id) {
-                n.title = title
-                n.desc = desc
-                n.isUpdated = true
-                n.time = time
+                n.title = title;
+                n.desc = desc;
+                n.images = images;
+                n.isUpdated = true;
+                n.time = time;
             }
-            setNote(n);
             return n;
-        })
-        setNotes(newNotes)
-        await AsyncStorage.setItem('notes', JSON.stringify(newNotes))
+        });
+        setNotes(newNotes);
+        await AsyncStorage.setItem('notes', JSON.stringify(newNotes));
+        setNote({
+            ...note,
+            title,
+            desc,
+            images,
+            isUpdated: true,
+            time
+        });
     }
-    const handleOnClose = () => setModal(false)
+
+    const handleOnClose = () => setModal(false);
     const openEditModal = () => {
-        setIsEdit(true)
-        setModal(true)
+        setIsEdit(true);
+        setModal(true);
     }
+
     return (
         <>
             <ScrollView contentContainerStyle={[styles.container, { paddingTop: headerHeight }]}>
-                <Text style={styles.time}>{note.isUpdated
-                    ? `Updated At ${formatDate(note.time)}`
-                    : `Created At ${formatDate(note.time)}`}
+                <Text style={styles.time}>
+                    {note.isUpdated
+                        ? `Updated At ${formatDate(note.time)}`
+                        : `Created At ${formatDate(note.time)}`}
                 </Text>
                 <Text style={styles.title}>{note.title}</Text>
                 <Text style={styles.desc}>{note.desc}</Text>
+                {note.images && note.images.length > 0 && (
+                    <ScrollView horizontal style={styles.imageContainer}>
+                        {note.images.map((imageUri, index) => (
+                            <Image key={index} source={{ uri: imageUri }} style={styles.image} />
+                        ))}
+                    </ScrollView>
+                )}
             </ScrollView>
             <View style={styles.btnContainer}>
                 <RoundIconBtn
                     antIconName='delete'
                     style={{ backgroundColor: colors.ERROR, marginBottom: 15 }}
-                    onPress={dispalyDelectAlert}
+                    onPress={displayDeleteAlert}
                 />
                 <RoundIconBtn
                     antIconName='edit'
@@ -103,12 +120,19 @@ const NoteDetails = (props) => {
                     onPress={openEditModal}
                 />
             </View>
-            <NoteInputModel isEdit={isEdit} note={note} onClose={handleOnClose} onSubmit={handleUpdate} visible={showModal} />
+            <NoteInputModel
+                isEdit={isEdit}
+                note={note}
+                onClose={handleOnClose}
+                onSubmit={handleUpdate}
+                visible={showModal}
+            />
         </>
     );
 }
 
 const width = Dimensions.get('window').width - 40;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -134,6 +158,16 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 15,
         bottom: 50
+    },
+    imageContainer: {
+        flexDirection: 'row',
+        marginTop: 10,
+    },
+    image: {
+        width: 60,
+        height: 60,
+        borderRadius: 5,
+        marginRight: 5,
     }
 });
 

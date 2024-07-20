@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, TextInput, Text, StatusBar, TouchableWithoutFeedback, Keyboard, FlatList } from 'react-native';
 import colors from "../misc/colors";
-import SearchBar from "../components/Serchbar";
+import SearchBar from "../components/searchBar";
 import RoundIconBtn from "../components/RoundIconButton";
-import NoteInputModal from "../components/NoteInputModel"
-import Note from "../components/Note"
+import NoteInputModal from "../components/NoteInputModel";
+import Note from "../components/Note";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNote } from "../../contents/NoteProvider";
 import NotFound from "../components/NotFound";
+
 const reverseData = data => {
     return data.sort((a, b) => {
         const aInt = parseInt(a.time);
@@ -17,7 +18,6 @@ const reverseData = data => {
         if (aInt > bInt) return -1;
     });
 };
-
 
 const NoteScreen = ({ user, navigation }) => {
     const [greet, setGreet] = useState('');
@@ -40,8 +40,8 @@ const NoteScreen = ({ user, navigation }) => {
 
     const reverseNotes = reverseData(notes);
 
-    const handleOnSubmit = async (title, desc) => {
-        const note = { id: Date.now(), title, desc, time: Date.now() };
+    const handleOnSubmit = async (title, desc, images = []) => {
+        const note = { id: Date.now(), title, desc, time: Date.now(), images };
         const updatedNotes = [...notes, note];
         setNotes(updatedNotes);
         await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
