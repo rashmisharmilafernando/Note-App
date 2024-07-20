@@ -6,10 +6,15 @@ import RoundIconBtn from "../components/RoundIconButton";
 import NoteInputModel from "../components/NoteInputModel"
 import Note from "../components/Note"
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const NoteScreen = ({ user }) => {
+import { useNote } from "../../contents/NoteProvider";
+
+
+
+
+const NoteScreen = ({ user, navigation }) => {
     const [greet, setGreet] = useState("");
     const [modalVisible, setModalVisible] = useState(false);
-    const [notes, setNotes] = useState([]);
+    const { notes, setNotes } = useNote()
 
     const findGreet = () => {
         const hrs = new Date().getHours();
@@ -19,16 +24,10 @@ const NoteScreen = ({ user }) => {
 
     };
 
-    const findNotes = async () => {
-        const result = await AsyncStorage.getItem('notes');
-
-        if (result !== null) setNotes(JSON.parse(result));
-    }
-
     useEffect(() => {
-        findNotes();
-
         findGreet();
+
+
     }, []);
 
     const handleOnSubmit = async (title, desc) => {
@@ -38,6 +37,9 @@ const NoteScreen = ({ user }) => {
         setNotes(updateNotes)
         await AsyncStorage.setItem('notes', JSON.stringify(updateNotes))
     }
+    const openNote = (note) => {
+        navigation.navigate('NoteDetails', { note });
+    };
 
     return (
         <>
@@ -55,9 +57,11 @@ const NoteScreen = ({ user }) => {
                     <FlatList
                         data={notes}
                         numColumns={2}
-                        keyExtractor={item => item.id.toString()}
-                        renderItem={({ item }) => <Note item={item} />}
                         columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 15 }}
+
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) =>
+                            <Note onPress={() => openNote(item)} item={item} />}
                     />
                     {!notes.length ? (
                         <View style={[StyleSheet.absoluteFillObject, styles.emptyHeanderContainer]}>
@@ -109,7 +113,8 @@ const styles = StyleSheet.create({
     addBtn: {
         position: 'absolute',
         right: 15,
-        bottom: 50
+        bottom: 50,
+        zIndex: 1
     }
 
 });

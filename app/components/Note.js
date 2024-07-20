@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Modal, StyleSheet, TextInput, View, Text, StatusBar, TouchableWithoutFeedback, Keyboard, Dimensions } from 'react-native';
+import { Modal, StyleSheet, TextInput, View, Text, StatusBar, TouchableWithoutFeedback, Keyboard, Dimensions, TouchableOpacity } from 'react-native';
 import colors from "../misc/colors";
 import SearchBar from "../components/serchbar";
 import RoundIconBtn from "../components/RoundIconButton";
 
-const Note = ({ item }) => {
+const Note = ({ item,onPress}) => {
     const { title, desc } = item;
 
     return (
         <>
 
-            <View style={styles.container}>
+            <TouchableOpacity onPress={onPress} style={styles.container}>
                 <Text style={styles.title} numberOfLines={2}>{title}</Text>
                 <Text numberOfLines={2}>{desc}</Text>
 
 
-            </View>
+            </TouchableOpacity>
 
         </>
     );
