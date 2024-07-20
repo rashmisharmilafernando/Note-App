@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Modal, StyleSheet, TextInput, View, Text, StatusBar, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import colors from "../misc/colors";
-import SearchBar from "../components/serchbar";
+import SearchBar from "./Serchbar";
 import RoundIconBtn from "../components/RoundIconButton";
 
-const NoteInputModel = ({ visible, onClose, onsubmit }) => {
+const NoteInputModel = ({ visible, onClose, onSubmit, note, isEdit }) => {
     const [title, setTitle] = useState('');
     const [desc, setDesc] = useState('');
     const handleModelClose = () => {
         Keyboard.dismiss();
 
     };
+    useEffect(() => {
+        if (isEdit) {
+            setTitle(note.title);
+            setDesc(note.desc);
+        }
+    }, [isEdit])
+
     const closeModel = () => {
-        setTitle('');
-        setDesc('');
+
+        if (!isEdit) {
+            setTitle('');
+            setDesc('');
+        }
+
         onClose();
 
     }
@@ -24,12 +35,18 @@ const NoteInputModel = ({ visible, onClose, onsubmit }) => {
 
     const handleSubmit = () => {
         if (!title.trim() && !desc.trim()) return onClose();
-        onsubmit(title, desc);
-        setTitle('');
-        setDesc('');
-        onClose();
 
-    }
+        if (isEdit) {
+            onSubmit(title, desc, Date.now());
+        } else {
+            onSubmit(title, desc);
+            setTitle('');
+            setDesc('');
+        }
+        onClose();
+    };
+
+
     return (
         <>
             <StatusBar hidden />
@@ -46,7 +63,7 @@ const NoteInputModel = ({ visible, onClose, onsubmit }) => {
                     <TextInput
                         value={desc}
                         multiline
-                        placeholder="Note"
+                        placeholder="Type something..."
                         style={[styles.input, styles.desc]}
                         onChangeText={(text) => handleOnChangeText(text, 'desc')}
                     />
@@ -57,12 +74,12 @@ const NoteInputModel = ({ visible, onClose, onsubmit }) => {
                         />
                         {title.trim() || desc.trim() ? (
                             < RoundIconBtn
-                            size={15}
-                            style={{ marginLeft: 15 }}
-                            antIconName='close'
-                            onPress={closeModel}
+                                size={15}
+                                style={{ marginLeft: 15 }}
+                                antIconName='close'
+                                onPress={closeModel}
 
-                        />
+                            />
                         ) : null}
 
                     </View>
@@ -83,11 +100,10 @@ const NoteInputModel = ({ visible, onClose, onsubmit }) => {
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 20,
-        paddingTop: 15
+        paddingVertical: 50
     },
     input: {
-        borderBottomWidth: 2,
-        borderBottomColor: colors.PRIMARY,
+        
         fontSize: 20,
         color: colors.DARK
     },
@@ -95,6 +111,7 @@ const styles = StyleSheet.create({
         height: 40,
         marginBottom: 15,
         fontWeight: 'bold',
+        fontSize:48
 
     },
     desc: {

@@ -6,17 +6,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import NoteDetails from './app/components/NoteDetails';
 import { NavigationContainer } from '@react-navigation/native';
 import NoteProvider from './contents/NoteProvider';
-
+import { Text } from 'react-native';
+import colors from './app/misc/colors';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [user, setUser] = useState({});
+  const [isAppFirstTimeOpen, setIsAppFirstTimeOpen] = useState(false);
 
   const findUser = async () => {
     const result = await AsyncStorage.getItem('user');
-    if (result !== null) {
-      setUser(JSON.parse(result));
-    }
+
+    if (result === null) return setIsAppFirstTimeOpen(true);
+
+    setUser(JSON.parse(result));
+    setIsAppFirstTimeOpen(false);
   };
 
   useEffect(() => {
@@ -25,17 +29,41 @@ export default function App() {
 
   const RenderNoteScreen = (props) => <NoteScreen {...props} user={user} />;
 
-  if (!user.name) return <Intro onFinish={findUser} />;
+  if (isAppFirstTimeOpen) return <Intro onFinish={findUser} />;
 
   return (
     <NavigationContainer>
       <NoteProvider>
-        <Stack.Navigator screenOptions={{ headerTitle: '', headerTransparent: true }}>
-          <Stack.Screen component={RenderNoteScreen} name="NoteScreen" />
-          <Stack.Screen component={NoteDetails} name="NoteDetails" />
+        <Stack.Navigator
+          screenOptions={{
+            headerTitleAlign: 'center', // Aligns title to the center
+            headerTransparent: true,
+          }}
+        >
+          <Stack.Screen
+            component={RenderNoteScreen}
+            name="NoteScreen"
+            options={{
+              headerTitle: (props) => <Text {...props} style={{ color: colors.PRIMARY, fontSize: 36,fontWeight:'bold' }}>My Notes</Text>,
+              headerTitleStyle: {
+                fontWeight: 'bold',
+                fontSize: 24,
+              },
+            }}
+          />
+          <Stack.Screen
+            component={NoteDetails}
+            name="NoteDetails"
+            options={{
+              headerTitle: (props) => <Text {...props} style={{ color: colors.PRIMARY, fontSize: 36,fontWeight:'bold'  }}>Note Details</Text>,
+              headerTitleStyle: {
+                fontWeight: 'bold',
+                fontSize: 24,
+              },
+            }}
+          />
         </Stack.Navigator>
       </NoteProvider>
-
     </NavigationContainer>
   );
 }

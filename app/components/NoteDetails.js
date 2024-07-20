@@ -20,10 +20,14 @@ const formatDate = ms => {
 }
 
 const NoteDetails = (props) => {
-    const { note } = props.route.params;
+    const [note, setNote] = useState(props.route.params.note)
+
     const headerHeight = useHeaderHeight();
     const { setNotes } = useNote();
-    const [showModal, setModal] = useState(false)
+    const [showModal, setModal] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+
+
     const deleteNote = async () => {
         const result = await AsyncStorage.getItem('notes');
         let notes = [];
@@ -55,13 +59,35 @@ const NoteDetails = (props) => {
         );
     }
 
-    const handleUpdate =()=>{}
-    const handleOnClose =()=>setModal(false)
-    
+    const handleUpdate = async (title, desc, time) => {
+        const result = await AsyncStorage.getItem('notes')
+        let notes = [];
+        if (result != null) notes = JSON.parse(result)
+        const newNotes = notes.filter(n => {
+            if (n.id === note.id) {
+                n.title = title
+                n.desc = desc
+                n.isUpdated = true
+                n.time = time
+            }
+            setNote(n);
+            return n;
+        })
+        setNotes(newNotes)
+        await AsyncStorage.setItem('notes', JSON.stringify(newNotes))
+    }
+    const handleOnClose = () => setModal(false)
+    const openEditModal = () => {
+        setIsEdit(true)
+        setModal(true)
+    }
     return (
         <>
             <ScrollView contentContainerStyle={[styles.container, { paddingTop: headerHeight }]}>
-                <Text style={styles.time}>{`Created At ${formatDate(note.time)}`}</Text>
+                <Text style={styles.time}>{note.isUpdated
+                    ? `Updated At ${formatDate(note.time)}`
+                    : `Created At ${formatDate(note.time)}`}
+                </Text>
                 <Text style={styles.title}>{note.title}</Text>
                 <Text style={styles.desc}>{note.desc}</Text>
             </ScrollView>
@@ -74,10 +100,10 @@ const NoteDetails = (props) => {
                 <RoundIconBtn
                     antIconName='edit'
                     style={{ backgroundColor: colors.PRIMARY }}
-                    onPress={() => console.log('Editing note')}
+                    onPress={openEditModal}
                 />
             </View>
-            <NoteInputModel onClose={handleOnClose} onsubmit={handleUpdate} visible={showModal} />
+            <NoteInputModel isEdit={isEdit} note={note} onClose={handleOnClose} onsubmit={handleUpdate} visible={showModal} />
         </>
     );
 }
@@ -86,7 +112,8 @@ const width = Dimensions.get('window').width - 40;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 15
+        paddingHorizontal: 15,
+        paddingVertical: 70,
     },
     title: {
         fontSize: 30,
@@ -100,7 +127,8 @@ const styles = StyleSheet.create({
     time: {
         textAlign: 'right',
         fontSize: 12,
-        opacity: 0.5
+        opacity: 0.5,
+        paddingTop: 30,
     },
     btnContainer: {
         position: 'absolute',
